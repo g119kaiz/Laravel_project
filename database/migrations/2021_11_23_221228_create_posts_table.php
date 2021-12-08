@@ -15,13 +15,13 @@ class CreatePostsTable extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
 	    $table->increments('id');
-	    $table->string('user_id');
-	    $table->string('game_id');
+	    $table->string('user_id')->nullable()->change();
+	    $table->string('game_id')->nullable()->change();
 	    $table->string('text');
-	    $table->string('image');
-	    $table->integer('reply_count');
-	    $table->integer('fav_count');
-	    $table->integer('parent_id');
+	    $table->string('image')->nullable()->change();
+	    $table->integer('reply_count')->nullable()->change();
+	    $table->integer('fav_count')->nullable()->change();
+	    $table->integer('parent_id')->nullable()->change();
 	    $table->timestamps();
 	    $table->softDeletes();
         });
