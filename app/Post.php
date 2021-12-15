@@ -8,6 +8,7 @@ class Post extends Model
 {
    protected $fillable = [
        	'text',
+       	'parent_id'
    ];
    public function getPaginateByLimit(int $limit_count = 10)
    {

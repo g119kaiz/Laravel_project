@@ -17,16 +17,10 @@
                 <h3>本文</h3>
                 <p>{{ $post->text }}</p>    
             </div>
+        </div>
         <div class="reply">
             [<a href="./reply/{{ $post->id }}">返信</a>]
         </div>
-        </div>
-            <div class="replies">
-                @foreach($replies as $reply)
-                    <p class="text">{{ $reply->text }}</p>
-                    [<a href="./reply/{{ $reply->id }}">返信</a>]
-                @endforeach
-            </div>
         <div class="footer">
             <a href="/">戻る</a>
         </div>

@@ -17,11 +17,11 @@
                 <input type="file" name="image" accept="image/png, image/jpeg"/>
             </div>
             <div class="parent_id">
-                <input type="hidden" name="post[parent_id]" value="NULL">
+                {{ $post->id }}
+                <input type="hidden" name="post[parent_id]" value="{{ $post->id }}">
             </div>
             <input type="submit" value="保存"/>
         </form>
          <div class="back">[<a href="/">back</a>]</div>
     </body>
 </html>
-

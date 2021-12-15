@@ -20,7 +20,14 @@ class PostController extends Controller
  }
  public function show(Post $post)
  {
-	    return view('posts/show')->with(['post'=> $post]);
+     $replies = Post::where('parent_id', $post->id)->get();
+	    return view('posts/show')->with([
+	        'post'=> $post,
+	        'replies'=> $replies
+	     ]);
+ }
+ public function reply(Post $post){
+     return view('posts/reply')->with(['post'=> $post]);
  }
  public function create()
  {
@@ -30,6 +37,9 @@ class PostController extends Controller
  {
 	    $input = $request['post'];
 	    $post->fill($input)->save();
+	    if($request->input('parent_id')){
+	       $post->parent_id = $request->input('parent_id');
+	    }
 	    $file = $request->file('image');
 	    Storage::disk('s3')->put('/', $file);
 	    return redirect('/posts/' . $post->id);
