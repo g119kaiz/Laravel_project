@@ -5,17 +5,16 @@
     <head>
         <meta charset="utf-8">
         <meta name="csrf-token" content="{{ csrf_token() }}">
-        <title>ゲームSNS</title>
+        <title>{{$user->name}}のホーム画面</title>
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
         <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css">
-        <link rel="stylesheet" href="/css/app.css">
         <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
         <script>
-        $(function () {
+            $(function () {
                 let like = $('.like-toggle'); 
                 let likeReviewId;
-                like.on('click', function () {
+                like.on('click', function () { 
                 let $this = $(this);
                 likeReviewId = $this.data('review-id');
                 console.log(likeReviewId);
@@ -26,14 +25,14 @@
                 },  //↑name属性がcsrf-tokenのmetaタグのcontent属性の値を取得
                 url: '/like',
                 type: 'POST',
-                data: {
-                    'review_id': likeReviewId
+                data: { 
+                    'review_id': likeReviewId 
                 },
                 dataType : 'json'
                 })
                 //通信成功した時の処理
                 .done(function (data) {
-                   if($this.attr('class') == 'far fa-heart like-toggle'){
+                    if($this.attr('class') == 'far fa-heart like-toggle'){
                         $this.removeClass('far fa-heart like-toggle');
                         $this.addClass('fas fa-heart like-toggle')
                         $this.css("color","red");
@@ -51,22 +50,20 @@
             });
             });
         </script>
-        
     </head>
     <body>
-	<h1>ホーム画面</h1>
+	<h1>{{ $user->name }}のホーム画面</h1>
 	<a href='/games'>ゲーム一覧</a>
-	<a href='/users'>ユーザー検索</a>
-	[<a href='/posts/create/0'>投稿</a>]
+	<a href='/'>ホームに戻る</a>
         <div class='posts'>
             @foreach ($posts as $post)
-            <div class='post'>
-                <h2>
-		        <i class="fas fa-user-circle"></i><b>{{ $post->user_name }}</b>
-		        </h2>
-		        <p class='text'>{{ $post->text}}</p>
+                <div class='post'>
+		        	 <h2>
+		                 <i class="fas fa-user-circle"></i><b>{{ $post->user_name }}</b>
+		             </h2>
+		            <p>{{$post->text}}</p>
 		        @if ( $post->image_path != 'NULL' )
-                    <img src="{{ $post->image_path }}" width="200px"><br>
+                    <img src="{{ $post->image_path }}" width="200px">
                 @endif
                 <a href='/posts/{{$post->id}}'>詳細へ</a>
                 @if (!$post->isLikedBy(Auth::user()))
@@ -76,12 +73,10 @@
 			        <i class="fas fa-heart like-toggle" style="color: red;" data-review-id="{{$post->id}}"></i>
 			        <span class="like-counter">{{$post->fav_count}}</span>
 			    @endif
-            </div>
+                </div>
             @endforeach
 	</div>
-	<div class='paginate'>
 
-    </div>
     </body>
 </html>
 @endsection

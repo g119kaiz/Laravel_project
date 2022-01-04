@@ -4,7 +4,12 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Model;
 use App\Post;
+use App\Game;
+use App\Comment;
+use App\Like;
 
 class PostController extends Controller
 {
@@ -16,32 +21,77 @@ class PostController extends Controller
  *      */
  public function index(Post $post)
  {
-     return view('posts/index')->with(['posts' => $post->getPaginateByLimit()]);
+     $user_id = Auth::user()->id;
+     $post = Post::where('user_id', $user_id)->orderBy('updated_at', 'DESC')->get(); //ログイン付けてないから0にしているけどいずれはuseridにする
+     return view('posts/index')->with([
+            'posts' => $post
+         ]);
  }
  public function show(Post $post)
  {
-     $replies = Post::where('parent_id', $post->id)->get();
+     $replies = Comment::where('post_id', $post->id)->get();
 	    return view('posts/show')->with([
 	        'post'=> $post,
 	        'replies'=> $replies
 	     ]);
  }
- public function reply(Post $post){
-     return view('posts/reply')->with(['post'=> $post]);
- }
- public function create()
+ public function create(int $id)
  {
-	    return view('posts/create');
+	    return view('posts/create')->with([
+	            'game_id'=> $id
+	        ]);
  }
  public function store(Request $request, Post $post)
  {
 	    $input = $request['post'];
-	    $post->fill($input)->save();
-	    if($request->input('parent_id')){
-	       $post->parent_id = $request->input('parent_id');
-	    }
 	    $file = $request->file('image');
-	    Storage::disk('s3')->put('/', $file);
+	    if( $file ){
+	       $path = Storage::disk('s3')->put('/', $file);
+	       $post->image_path = Storage::disk('s3')->url($path);
+	    }else{
+	       $post->image_path = 'NULL';
+	    }
+	    $post->fav_count = '0';
+	    $post->fill($input)->save();
 	    return redirect('/posts/' . $post->id);
+ }
+ public function like(Request $request, Post $post, Like $like)
+ {
+    $user_id = Auth::user()->id;
+    $review_id = $request->review_id; //2.投稿idの取得
+    $already_liked = Like::where('user_id', $user_id)->where('post_id', $review_id)->first();
+    $post = Post::where('id',$review_id)->first();
+    $favcnt = $post->fav_count;
+    if(!$already_liked){
+        $favcnt++;
+        $like->post_id = $review_id;
+        $like->reply_id = 'NULL';
+        $like->user_id = $user_id;
+        $like->save();
+    }else{
+        $favcnt--;
+        Like::where('user_id', $user_id)->where('post_id', $review_id)->delete();
+    }
+    $post->fav_count = $favcnt;
+    $post->save();
+    //5.この投稿の最新の総いいね数を取得
+    $param = [
+        'review_likes_count' => $favcnt,
+    ];
+    return response()->json($param); //6.JSONデータをjQueryに返す
+ }
+ public function gamelist(Game $game)
+ {
+     return view('posts/gamelist')->with([
+            'games' => $game->getPaginateByLimit()
+         ]);
+ }
+ public function gameindex(Game $game)
+ {
+     $post = Post::where('game_id',$game->id)->get();
+     return view('posts/gameindex')->with([
+            'posts' => $post,
+            'game' => $game
+         ]);
  }
 }
